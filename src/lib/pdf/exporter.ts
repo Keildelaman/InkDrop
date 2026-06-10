@@ -1,5 +1,16 @@
 import { PDFDocument, degrees } from 'pdf-lib';
+import type { Rotation } from 'pdf-lib';
 import type { SignaturePlacement, PageInfo } from '../../types';
+
+type QuarterTurn = 0 | 90 | 180 | 270;
+
+type SignatureDrawOptions = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotate?: Rotation;
+};
 
 export async function exportPdf(
   originalBytes: Uint8Array,
@@ -28,43 +39,67 @@ export async function exportPdf(
     const image = embeddedImages.get(p.dataUrl);
     if (!image) continue;
 
-    const rotation = pdfPage.getRotation().angle;
+    const rotation = normalizeRotation(
+      pages[p.pageIndex]?.rotation ?? pdfPage.getRotation().angle
+    );
 
-    if (rotation === 0) {
-      pdfPage.drawImage(image, {
-        x: p.x,
-        y: p.y,
-        width: p.width,
-        height: p.height,
-      });
-    } else if (rotation === 90) {
-      pdfPage.drawImage(image, {
-        x: p.y,
-        y: pdfPage.getWidth() - p.x - p.width,
-        width: p.height,
-        height: p.width,
-        rotate: degrees(-90),
-      });
-    } else if (rotation === 180) {
-      pdfPage.drawImage(image, {
-        x: pdfPage.getWidth() - p.x - p.width,
-        y: pdfPage.getHeight() - p.y - p.height,
-        width: p.width,
-        height: p.height,
-        rotate: degrees(180),
-      });
-    } else if (rotation === 270) {
-      pdfPage.drawImage(image, {
-        x: pdfPage.getHeight() - p.y - p.height,
-        y: p.x,
-        width: p.height,
-        height: p.width,
-        rotate: degrees(90),
-      });
-    }
+    pdfPage.drawImage(
+      image,
+      getSignatureDrawOptions(p, pdfPage.getWidth(), pdfPage.getHeight(), rotation)
+    );
   }
 
   return pdfDoc.save();
+}
+
+export function getSignatureDrawOptions(
+  placement: Pick<SignaturePlacement, 'x' | 'y' | 'width' | 'height'>,
+  pageWidth: number,
+  pageHeight: number,
+  rotation: QuarterTurn
+): SignatureDrawOptions {
+  switch (rotation) {
+    case 90:
+      return {
+        x: pageWidth - placement.y,
+        y: placement.x,
+        width: placement.width,
+        height: placement.height,
+        rotate: degrees(90),
+      };
+    case 180:
+      return {
+        x: pageWidth - placement.x,
+        y: pageHeight - placement.y,
+        width: placement.width,
+        height: placement.height,
+        rotate: degrees(180),
+      };
+    case 270:
+      return {
+        x: placement.y,
+        y: pageHeight - placement.x,
+        width: placement.width,
+        height: placement.height,
+        rotate: degrees(270),
+      };
+    case 0:
+    default:
+      return {
+        x: placement.x,
+        y: placement.y,
+        width: placement.width,
+        height: placement.height,
+      };
+  }
+}
+
+function normalizeRotation(angle: number): QuarterTurn {
+  const normalized = ((angle % 360) + 360) % 360;
+  if (normalized === 90 || normalized === 180 || normalized === 270) {
+    return normalized;
+  }
+  return 0;
 }
 
 function dataUrlToUint8Array(dataUrl: string): Uint8Array {

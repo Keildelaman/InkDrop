@@ -1,15 +1,13 @@
 import type { PageInfo } from '../types';
 
 export function effectiveDimensions(page: PageInfo): [number, number] {
-  if (page.rotation === 90 || page.rotation === 270) {
-    return [page.height, page.width];
-  }
+  // pdf.js viewport dimensions already include the page's /Rotate value.
   return [page.width, page.height];
 }
 
 /**
- * Convert PDF-space coordinates to screen-relative coordinates (for positioning HTML overlays).
- * PDF origin is bottom-left; screen origin is top-left.
+ * Convert displayed-page coordinates to screen-relative coordinates.
+ * Displayed-page origin is bottom-left; screen origin is top-left.
  */
 export function pdfToScreen(
   pdfX: number,

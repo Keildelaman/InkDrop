@@ -1,4 +1,5 @@
 import type { AppPhase, PageInfo, SignaturePlacement, SavedSignature } from '../types';
+import { effectiveDimensions } from '../lib/geometry';
 
 function createAppState() {
   let phase = $state<AppPhase>('empty');
@@ -186,13 +187,6 @@ function createAppState() {
     removeSavedSignature,
     resetPdf,
   };
-}
-
-function effectiveDimensions(page: PageInfo): [number, number] {
-  if (page.rotation === 90 || page.rotation === 270) {
-    return [page.height, page.width];
-  }
-  return [page.width, page.height];
 }
 
 export { effectiveDimensions };
