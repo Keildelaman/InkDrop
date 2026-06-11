@@ -4,6 +4,12 @@
   import { toastState } from '../../lib/toast.svelte';
   import Button from '../ui/Button.svelte';
 
+  interface Props {
+    onback?: () => void;
+  }
+
+  let { onback }: Props = $props();
+
   function prevPage() {
     appState.setCurrentPage(appState.currentPageIndex - 1);
   }
@@ -56,11 +62,29 @@
     }
     appState.resetPdf();
   }
+
+  function handleBackToTools() {
+    if (!onback) return;
+    if (appState.hasUnsavedWork && !confirm('You have placed signatures. Return to all tools and keep this PDF open?')) {
+      return;
+    }
+    onback();
+  }
 </script>
 
 <div class="h-14 shrink-0 border-t border-border bg-surface-elevated flex items-center justify-between px-4 gap-2">
   <!-- Left: Add signature + New PDF -->
   <div class="flex items-center gap-2">
+    {#if onback}
+      <Button variant="ghost" onclick={handleBackToTools} title="All tools">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12 19-7-7 7-7"/>
+          <path d="M19 12H5"/>
+        </svg>
+        <span class="max-sm:hidden">Tools</span>
+      </Button>
+    {/if}
+
     <Button variant="primary" onclick={() => appState.openSignatureModal()}>
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="5" x2="12" y2="19"/>

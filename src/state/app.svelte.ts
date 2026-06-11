@@ -1,7 +1,8 @@
-import type { AppPhase, PageInfo, SignaturePlacement, SavedSignature } from '../types';
+import type { AppPhase, AppTool, PageInfo, SignaturePlacement, SavedSignature } from '../types';
 import { effectiveDimensions } from '../lib/geometry';
 
 function createAppState() {
+  let selectedTool = $state<AppTool>('home');
   let phase = $state<AppPhase>('empty');
   let pdfBytes = $state<Uint8Array | null>(null);
   let pdfName = $state('');
@@ -37,6 +38,10 @@ function createAppState() {
 
   function setPhase(p: AppPhase) {
     phase = p;
+  }
+
+  function setSelectedTool(tool: AppTool) {
+    selectedTool = tool;
   }
 
   function setPdf(bytes: Uint8Array, name: string, pageInfos: PageInfo[]) {
@@ -153,6 +158,7 @@ function createAppState() {
   }
 
   return {
+    get selectedTool() { return selectedTool; },
     get phase() { return phase; },
     get pdfBytes() { return pdfBytes; },
     get pdfName() { return pdfName; },
@@ -171,6 +177,7 @@ function createAppState() {
     get historyLength() { return history.length; },
     toggleTheme,
     setPhase,
+    setSelectedTool,
     setPdf,
     setCurrentPage,
     setZoom,

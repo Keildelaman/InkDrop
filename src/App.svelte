@@ -1,9 +1,12 @@
 <script lang="ts">
   import { appState } from './state/app.svelte';
   import { loadSignatures } from './lib/signature/store';
+  import type { AppTool } from './types';
   import Header from './components/layout/Header.svelte';
   import Sidebar from './components/layout/Sidebar.svelte';
   import Toolbar from './components/layout/Toolbar.svelte';
+  import AudioConverter from './components/audio/AudioConverter.svelte';
+  import ToolPicker from './components/home/ToolPicker.svelte';
   import Dropzone from './components/pdf/Dropzone.svelte';
   import Viewer from './components/pdf/Viewer.svelte';
   import SignatureModal from './components/signature/Modal.svelte';
@@ -18,6 +21,7 @@
 
   // Keyboard shortcuts
   function handleKeydown(e: KeyboardEvent) {
+    if (appState.selectedTool !== 'pdf-sign') return;
     if (appState.phase !== 'editing') return;
     if (appState.signatureModalOpen) return;
 
@@ -59,13 +63,21 @@
   // Warn before leaving with unsaved work
   $effect(() => {
     function handleBeforeUnload(e: BeforeUnloadEvent) {
-      if (appState.hasUnsavedWork) {
+      if (appState.selectedTool === 'pdf-sign' && appState.hasUnsavedWork) {
         e.preventDefault();
       }
     }
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   });
+
+  function selectTool(tool: AppTool) {
+    appState.setSelectedTool(tool);
+  }
+
+  function backToTools() {
+    appState.setSelectedTool('home');
+  }
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -74,13 +86,17 @@
   <div class="h-screen flex flex-col bg-surface text-text">
     <Header />
     <main class="flex-1 flex overflow-hidden">
-      {#if appState.phase === 'empty'}
-        <Dropzone />
+      {#if appState.selectedTool === 'home'}
+        <ToolPicker onselect={selectTool} />
+      {:else if appState.selectedTool === 'audio-convert'}
+        <AudioConverter onback={backToTools} />
+      {:else if appState.phase === 'empty'}
+        <Dropzone onback={backToTools} />
       {:else}
         <Sidebar />
         <div class="flex-1 flex flex-col overflow-hidden">
           <Viewer />
-          <Toolbar />
+          <Toolbar onback={backToTools} />
         </div>
       {/if}
     </main>
