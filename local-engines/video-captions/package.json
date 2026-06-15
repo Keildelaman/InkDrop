@@ -1,0 +1,25 @@
+{
+  "name": "@inkdrop/video-captions-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "doctor": "powershell -ExecutionPolicy Bypass -File scripts/doctor.ps1",
+    "qa:real": "tsx src/qa/run-real.ts",
+    "server": "tsx src/api/server.ts",
+    "setup:whisperx": "powershell -ExecutionPolicy Bypass -File scripts/setup-whisperx.ps1",
+    "start": "tsx src/api/server.ts",
+    "test": "vitest run",
+    "render:sample": "tsx src/sample/render-sample.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

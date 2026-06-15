@@ -18,7 +18,7 @@
       </p>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-4">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
       <button
         class="text-left rounded-lg border border-border bg-surface-elevated hover:border-accent hover:bg-accent-light/30 transition-all duration-150 p-6 min-h-[13rem] flex flex-col justify-between cursor-pointer"
         onclick={() => onselect('pdf-sign')}
@@ -55,6 +55,27 @@
           <span class="block text-xl font-semibold">Convert Audio</span>
           <span class="block text-sm text-text-muted mt-2">
             Convert one M4A file to MP3 or WAV.
+          </span>
+        </span>
+      </button>
+
+      <button
+        class="text-left rounded-lg border border-border bg-surface-elevated hover:border-accent hover:bg-accent-light/30 transition-all duration-150 p-6 min-h-[13rem] flex flex-col justify-between cursor-pointer"
+        onclick={() => onselect('video-captions')}
+      >
+        <span class="h-12 w-12 rounded-lg bg-accent-light text-accent flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m22 8-6 4 6 4V8Z"/>
+            <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+            <path d="M6 15h6"/>
+            <path d="M6 12h4"/>
+          </svg>
+        </span>
+
+        <span>
+          <span class="block text-xl font-semibold">Video Captions</span>
+          <span class="block text-sm text-text-muted mt-2">
+            Burn styled subtitles into videos with a local engine.
           </span>
         </span>
       </button>

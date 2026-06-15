@@ -6,6 +6,7 @@
   import Sidebar from './components/layout/Sidebar.svelte';
   import Toolbar from './components/layout/Toolbar.svelte';
   import AudioConverter from './components/audio/AudioConverter.svelte';
+  import VideoCaptions from './components/video-captions/VideoCaptions.svelte';
   import ToolPicker from './components/home/ToolPicker.svelte';
   import Dropzone from './components/pdf/Dropzone.svelte';
   import Viewer from './components/pdf/Viewer.svelte';
@@ -90,6 +91,8 @@
         <ToolPicker onselect={selectTool} />
       {:else if appState.selectedTool === 'audio-convert'}
         <AudioConverter onback={backToTools} />
+      {:else if appState.selectedTool === 'video-captions'}
+        <VideoCaptions onback={backToTools} />
       {:else if appState.phase === 'empty'}
         <Dropzone onback={backToTools} />
       {:else}

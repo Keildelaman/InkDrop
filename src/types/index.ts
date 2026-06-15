@@ -25,6 +25,6 @@ export interface SavedSignature {
 
 export type AppPhase = 'empty' | 'editing' | 'exporting';
 
-export type AppTool = 'home' | 'pdf-sign' | 'audio-convert';
+export type AppTool = 'home' | 'pdf-sign' | 'audio-convert' | 'video-captions';
 
 export type SignatureInputMode = 'draw' | 'upload' | 'type';
