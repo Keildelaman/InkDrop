@@ -170,14 +170,12 @@ async function getCoreUrls(options: ConvertAudioOptions): Promise<{ coreURL: str
 }
 
 async function createCoreUrls(options: ConvertAudioOptions): Promise<{ coreURL: string; wasmURL: string }> {
-  const { toBlobURL } = await import('@ffmpeg/util');
   const baseUrl = `${import.meta.env.BASE_URL}ffmpeg-core`;
 
   options.onStatus?.('Downloading converter engine...');
-  const coreURL = await toBlobURL(
+  const coreURL = await toBlobURLOnce(
     `${baseUrl}/ffmpeg-core.js`,
     'text/javascript',
-    true,
     (event) => {
       if (event.total > 0) {
         options.onProgress?.({
@@ -188,10 +186,9 @@ async function createCoreUrls(options: ConvertAudioOptions): Promise<{ coreURL: 
     }
   );
 
-  const wasmURL = await toBlobURL(
+  const wasmURL = await toBlobURLOnce(
     `${baseUrl}/ffmpeg-core.wasm`,
     'application/wasm',
-    true,
     (event) => {
       if (event.total > 0) {
         options.onProgress?.({
@@ -203,6 +200,49 @@ async function createCoreUrls(options: ConvertAudioOptions): Promise<{ coreURL: 
   );
 
   return { coreURL, wasmURL };
+}
+
+async function toBlobURLOnce(
+  url: string,
+  mimeType: string,
+  onProgress?: (event: { total: number; received: number }) => void
+): Promise<string> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to download converter engine from ${url} (${response.status}).`);
+  }
+
+  const total = Number(response.headers.get('content-length') || 0);
+  const reader = response.body?.getReader();
+
+  if (!reader) {
+    const buffer = await response.arrayBuffer();
+    onProgress?.({ total: buffer.byteLength, received: buffer.byteLength });
+    return URL.createObjectURL(new Blob([buffer], { type: mimeType }));
+  }
+
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+
+    chunks.push(value);
+    received += value.byteLength;
+    onProgress?.({ total, received });
+  }
+
+  const buffer = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buffer.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+
+  onProgress?.({ total: total || received, received });
+  return URL.createObjectURL(new Blob([buffer], { type: mimeType }));
 }
 
 async function safeDelete(ffmpegInstance: FFmpegInstance, path: string) {
